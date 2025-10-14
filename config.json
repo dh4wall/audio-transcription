@@ -1,0 +1,30 @@
+{
+    "model": "tts_models/multilingual/multi-dataset/xtts_v2",
+    "output_path": "outputs/varhadi_xtts_v2",
+    "dataset_config": {
+        "name": "ljspeech",
+        "path": "dataset/",
+        "meta_file_train": "metadata.csv"
+    },
+    "language": "mr",
+    "text_cleaner": "indic_cleaners",
+    "use_phonemes": true,
+    "phonemizer": "espeak",
+    "phonemizer_lang": "mr",
+    "audio": {
+        "sample_rate": 22050,
+        "do_trim_silence": true,
+        "trim_db": 25
+    },
+    "epochs": 200,
+    "batch_size": 32,
+    "eval_batch_size": 16,
+    "learning_rate": 0.0001,
+    "save_step": 1000,
+    "eval_interval": 1000,
+    "num_loader_workers": 8,
+    "num_eval_loader_workers": 4,
+    "mixed_precision": true,
+    "run_eval": true,
+    "use_tensorboard": true
+}
