@@ -1,74 +1,73 @@
 import os
 import subprocess
 
-source_audio_dir = "audiofiles_cleaned"
-source_txt_dir = "output"
-dataset_dir = "My_Varhadi_TTS_Dataset"
-wavs_dir = os.path.join(dataset_dir, "wavs")
-metadata_path = os.path.join(dataset_dir, "metadata.csv")
-file_prefix = "varhadi"
+# Get the directory where the script is located
+sd = os.path.dirname(os.path.abspath(__file__))
 
-def create_dataset():
+a1 = os.path.join(sd, "audiofiles_cleaned")
+t1 = os.path.join(sd, "output")
+d1 = os.path.join(sd, "My_Varhadi_TTS_Dataset")
+w1 = os.path.join(d1, "wavs")
+m1 = os.path.join(d1, "metadata.csv")
+p1 = "varhadi"
+
+def create_ds():
     print("🚀 Starting dataset creation...")
 
-    os.makedirs(wavs_dir, exist_ok=True)
-    print(f"Created dataset directory at: {dataset_dir}")
+    os.makedirs(w1, exist_ok=True)
+    print(f"Created dataset directory at: {d1}")
 
     try:
-        txt_files = sorted([f for f in os.listdir(source_txt_dir) if f.endswith('.txt')])
-        audio_files_map = {os.path.splitext(f)[0]: f for f in os.listdir(source_audio_dir)}
-    except FileNotFoundError as e:
-        print(f"❌ Error: Make sure the '{source_audio_dir}' and '{source_txt_dir}' folders exist. Details: {e}")
+        # Get all .txt files and sort them numerically by filename
+        txt_files_list = [f for f in os.listdir(t1) if f.endswith('.txt')]
+        # Sorts '10.txt' after '9.txt' by converting the name to an integer
+        sorted_txt_files = sorted(txt_files_list, key=lambda x: int(os.path.splitext(x)[0]))
+    except (FileNotFoundError, ValueError) as e:
+        print(f"❌ Error: Could not find or parse files in '{t1}'. Ensure it exists and contains correctly named .txt files (e.g., '0.txt', '1.txt'). Details: {e}")
         return
 
-    metadata = []
-    counter = 1
+    m2 = []
+    c1 = 1
 
-    for txt_file in txt_files:
-        txt_base_name = os.path.splitext(txt_file)[0]  # e.g., "5"
+    for txt_file in sorted_txt_files:
+        # Get base name (e.g., '5' from '5.txt') to find matching audio
+        base_name = os.path.splitext(txt_file)[0]
+        s2 = os.path.join(t1, txt_file)
+        s1 = os.path.join(a1, f"{base_name}_normalized.mp3")
 
-        # Corrected logic to find a matching audio file
-        matching_audio_file = None
-        for audio_base_name, audio_full_filename in audio_files_map.items():
-            if audio_base_name.startswith(txt_base_name + '_') or audio_base_name == txt_base_name:
-                matching_audio_file = audio_full_filename
-                break
+        if os.path.exists(s1):
+            n1 = f"{p1}_{c1:04d}.wav"
+            d2 = os.path.join(w1, n1)
 
-        if matching_audio_file:
-            source_audio_path = os.path.join(source_audio_dir, matching_audio_file)
-            source_txt_path = os.path.join(source_txt_dir, txt_file)
-
-            new_wav_filename = f"{file_prefix}_{counter:04d}.wav"
-            dest_wav_path = os.path.join(wavs_dir, new_wav_filename)
-
-            print(f"Processing: {matching_audio_file} -> {new_wav_filename}")
-            command = [
+            print(f"Processing: {os.path.basename(s1)} & {txt_file} -> {n1}")
+            cmd = [
                 'ffmpeg',
-                '-i', source_audio_path,
+                '-i', s1,
                 '-ar', '22050',
                 '-ac', '1',
-                dest_wav_path,
+                d2,
                 '-hide_banner',
                 '-loglevel', 'error'
             ]
-            subprocess.run(command)
+            subprocess.run(cmd)
 
-            with open(source_txt_path, 'r', encoding='utf-8') as f:
-                transcript = f.read().strip().replace('\n', ' ')
+            with open(s2, 'r', encoding='utf-8') as f:
+                tr = f.read().strip().replace('\n', ' ')
 
-            if transcript:
-                metadata.append(f"{new_wav_filename}|{transcript}")
-                counter += 1
+            if tr:
+                m2.append(f"{n1}|{tr}")
+                c1 += 1
         else:
-            print(f"⚠️ Warning: No matching audio file found for {txt_file}, skipping.")
+            print(f"⚠️ Warning: Skipping {txt_file}. Could not find matching audio file '{base_name}.mp3' in '{a1}'.")
 
-    print(f"\n✍️ Writing metadata for {len(metadata)} files to {metadata_path}...")
-    with open(metadata_path, 'w', encoding='utf-8') as f:
-        for line in metadata:
-            f.write(line + '\n')
+    print(f"\n✍️ Writing metadata for {len(m2)} files to {m1}...")
+    with open(m1, 'w', encoding='utf-8') as f:
+        for l in m2:
+            f.write(l + '\n')
             
     print("\n✅ Dataset creation complete!")
-    print(f"Your new dataset is ready in the '{dataset_dir}' folder.")
+    print(f"Your new dataset is ready in the '{d1}' folder.")
 
 if __name__ == '__main__':
-    create_dataset()
+    create_ds()
+
