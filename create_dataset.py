@@ -4,9 +4,9 @@ import subprocess
 # Get the directory where the script is located
 sd = os.path.dirname(os.path.abspath(__file__))
 
-a1 = os.path.join(sd, "audiofiles_cleaned")
-t1 = os.path.join(sd, "output")
-d1 = os.path.join(sd, "My_Varhadi_TTS_Dataset")
+a1 = os.path.join(sd, "new_audios")
+t1 = os.path.join(sd, "new_output")
+d1 = os.path.join(sd, "My_Varhadi_TTS_Dataset_2")
 w1 = os.path.join(d1, "wavs")
 m1 = os.path.join(d1, "metadata.csv")
 p1 = "varhadi"
@@ -33,7 +33,7 @@ def create_ds():
         # Get base name (e.g., '5' from '5.txt') to find matching audio
         base_name = os.path.splitext(txt_file)[0]
         s2 = os.path.join(t1, txt_file)
-        s1 = os.path.join(a1, f"{base_name}_normalized.mp3")
+        s1 = os.path.join(a1, f"{base_name}.wav")
 
         if os.path.exists(s1):
             n1 = f"{p1}_{c1:04d}.wav"
@@ -58,7 +58,7 @@ def create_ds():
                 m2.append(f"{n1}|{tr}")
                 c1 += 1
         else:
-            print(f"⚠️ Warning: Skipping {txt_file}. Could not find matching audio file '{base_name}.mp3' in '{a1}'.")
+            print(f"⚠️ Warning: Skipping {txt_file}. Could not find matching audio file '{base_name}.wav' in '{a1}'.")
 
     print(f"\n✍️ Writing metadata for {len(m2)} files to {m1}...")
     with open(m1, 'w', encoding='utf-8') as f:
